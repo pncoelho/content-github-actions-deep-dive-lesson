@@ -29,3 +29,20 @@ jobs:
         with:
           name: zipped-bundle
           path: ${{ github.sha }}.zip
+
+  upload:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Download Artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: zipped-bundle
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key-id: ${{ secrets.AWS_SECRET_ACCESS_KEY_ID }}
+          aws-region: us-east-1
+      - name: Upload to S3
+        run: aws s3 cp ${{ github.sha }}.zip s3://gadd-my-bucket-01/${{ github.sha }}.zip
