@@ -46,3 +46,5 @@ jobs:
           aws-region: us-east-1
       - name: Upload to S3
         run: aws s3 cp ${{ github.sha }}.zip s3://gadd-my-bucket-01/${{ github.sha }}.zip
+
+# force a workflow execution
