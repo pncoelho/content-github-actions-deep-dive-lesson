@@ -1,9 +1,11 @@
 name: Deploy my Lambda Function
 
+
 on:
   push:
     branches:
       - main
+
 
 jobs:
   build:
@@ -11,24 +13,33 @@ jobs:
     steps:
       - name: Check out code
         uses: actions/checkout@v2
+
       - name: Set up python
+        id: install-python
         uses: actions/setup-python@v2
         with:
           python-version: 3.8
+
       - name: Install libraries
+        id: install-python-libraries
         run: |
             cd function
             python -m pip install --upgrade pip
             if [ -f requirements.txt ]; then pip install -r requirements.txt -t .; fi
+
       - name: Create zip bundle
+        id: zip-bundle
         run: |
             cd function
             zip -r ../${{ github.sha }}.zip .
+
       - name: Archive artifact
         uses: actions/upload-artifact@v2
+        id: archive-artifact
         with:
           name: zipped-bundle
           path: ${{ github.sha }}.zip
+
 
   upload:
     runs-on: ubuntu-latest
@@ -36,16 +47,22 @@ jobs:
     steps:
       - name: Download Artifact
         uses: actions/download-artifact@v2
+        id: download-artifact
         with:
           name: zipped-bundle
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
+        id: upload-configure-aws-credentials
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
+
       - name: Upload to S3
+        id: upload-to-s3
         run: aws s3 cp ${{ github.sha }}.zip s3://gadd-my-bucket-01/${{ github.sha }}.zip
+
 
   deploy:
     runs-on: ubuntu-latest
@@ -53,11 +70,14 @@ jobs:
     steps:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
+        id: deploy-configure-aws-credentials
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
+
       - name: Update function code
+        id: deploy-lambda
         run: |
             aws lambda update-function-code \
               --function-name my-function \
