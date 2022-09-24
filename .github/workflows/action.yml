@@ -80,7 +80,7 @@ jobs:
         id: deploy-lambda
         run: |
             aws lambda update-function-code \
-              --function-name my-function \
+              --function-name gadd-my-function \
               --s3-bucket gadd-my-bucket-01 \
               --s3-key ${{ github.sha }}.zip \
               --publish
