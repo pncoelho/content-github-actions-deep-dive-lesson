@@ -8,7 +8,7 @@ def lambda_handler(event, context):
     """
     print('Starting functions\n---------------------------------------------')
 
-    if event["input"] == "Hello":
+    if event["input"] in ["Hello", "Hi"]:
         return "World"
     else:
         raise
