@@ -99,10 +99,22 @@ jobs:
     
       - name: Create test function
         run: |
-            aws lambda create-function --function-name test-gadd-my-function-${{ matrix.input }} \
-              --code S3Bucket=gadd-my-bucket-01,S3Key=${{ github.sha }}.zip \
-              --handler lambda_function.lambda_handler --runtime python3.8 \
-              --role arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/my-lambda-role
+          aws lambda create-function --function-name test-gadd-my-function-${{ matrix.input }} \
+            --code S3Bucket=gadd-my-bucket-01,S3Key=${{ github.sha }}.zip \
+            --handler lambda_function.lambda_handler --runtime python3.8 \
+            --role arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/my-lambda-role
+      
+      # Added since the Lambda was sometimes still in pending while reaching the test function
+      - name: Check if Lambda is already created
+        run: |
+          checkLambdaStateCommand="aws lambda get-function --function-name TestLambda | jq .'Configuration'.'State'"
+          LambdaState=$(eval "$checkLambdaStateCommand")
+          while [[ "$LambdaState" != *"Active"* ]]
+          do
+            echo "Waiting for Lambda creation"
+            LambdaState=$(eval "$checkLambdaStateCommand")
+          done
+          echo "Lambda created"
 
       - name: Invoke test function
         run: |
