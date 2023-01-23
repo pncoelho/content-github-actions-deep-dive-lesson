@@ -107,14 +107,14 @@ jobs:
       # Added since the Lambda was sometimes still in pending while reaching the test function
       - name: Check if Lambda is already created
         run: |
-          checkLambdaStateCommand="aws lambda get-function --function-name TestLambda | jq .'Configuration'.'State'"
+          checkLambdaStateCommand="aws lambda get-function --function-name test-gadd-my-function-${{ matrix.input }} | jq .'Configuration'.'State'"
           LambdaState=$(eval "$checkLambdaStateCommand")
           while [[ "$LambdaState" != *"Active"* ]]
           do
             echo "Waiting for Lambda creation"
             LambdaState=$(eval "$checkLambdaStateCommand")
           done
-          echo "Lambda created"
+          echo "Lambda test-gadd-my-function-${{ matrix.input }} created"
 
       - name: Invoke test function
         run: |
